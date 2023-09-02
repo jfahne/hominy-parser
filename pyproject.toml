@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "hominy"
+version = "0.1.0"
+description = "jftech's golang Omniparser ported to Python :)"
+authors = ["Joe Fahnestock <joeyfahnestock@gmail.com>"]
+readme = "README.md"
+packages = [{include = "omniparser_port"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+black = "^23.7.0"
+flake8 = "^6.1.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
