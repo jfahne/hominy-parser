@@ -4,6 +4,7 @@ from typing import Any, TypeAlias, Tuple
 from collections.abc import Mapping
 import time
 from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 
 ########################
 # Port of datetime.go
@@ -16,19 +17,9 @@ go_time_zero = time.struct_time((1, 1, 1, 0, 0, 0, 0, 1, 0))
 
 
 def _ConvertTZ(t: time.struct_time, tz: str) -> time.struct_time:
-    """
-    Loose port of jf-tech/go-corelib/times::ConvertTZ
-    ...
-    Extended Summary
-    ---
-    There is not a simple way to replicate the times library from jf-tech/go-corelib
-    with python builtins.
-    Currently, the port will only support IANA time zone strings like "America/New_York".
-    In future work, the shorthands offered by times.ConvertTZ() for offset to timezone mapping
-    can be implemented.
-    """
+    """Loose port of jf-tech/go-corelib/times::ConvertTZ"""
     dt_utc = datetime(*t[:6], tzinfo=timezone.utc)
-    dt_tz = dt_utc.astimezone(fromTZ)
+    dt_tz = dt_utc.astimezone(ZoneInfo(tz))
     return time.struct_time(
         (*dt_tz.timetuple(), ZoneInfo(tz), dt_tz.utcoffset().total_seconds())
     )
@@ -68,7 +59,7 @@ def parseDateTime(
                 return go_time_zero, False, err
         else:
             try:
-                t: struct_time = _OverwriteTZ(t, toTZ)
+                t: time.struct_time = _OverwriteTZ(t, toTZ)
                 hasTZ = True
             except Exception as err:
                 return go_time_zero, False, err
@@ -87,7 +78,7 @@ def DateTimeToRFC3339(
     if datetime_in == "":
         return "", None
     t, hasTZ, err = parseDateTime(datetime_in, "", False, fromTZ, toTZ)
-    if err != None:
+    if err is not None:
         return "", err
     return rfc3339(t, hasTZ), None
 
@@ -95,13 +86,14 @@ def DateTimeToRFC3339(
 def _ParseBool(s: str) -> bool:
     truthy_vals = ["1", "t", "T", "TRUE", "true", "True"]
     falsy_vals = ["0", "f", "F", "FALSE", "false", "False"]
-    if s in trutyh_vals:
+    if s in truthy_vals:
         return True
     elif s in falsy_vals:
         return False
     else:
         raise Exception(
-            "Boolean value not parseable. See https://pkg.go.dev/strconv#ParseBool for acceptable values."
+            "Boolean value not parseable. " +
+            "See https://pkg.go.dev/strconv#ParseBool for acceptable values."
         )
 
 
@@ -111,7 +103,7 @@ def DateTimeLayoutToRFC3339(
     layoutTZ: str,
     fromTZ: str,
     toTZ: str,
-    _: transform.Ctx = None,
+    _: transformctx.Ctx = None,
 ) -> Tuple[str, Exception]:
     layoutTZFlag = False
     if (layout != "") and (layoutTZ != ""):
@@ -122,7 +114,7 @@ def DateTimeLayoutToRFC3339(
     if datetime_in == "":
         return "", None
     t, hasTZ, err = parseDateTime(datetime_in, layout, layoutTZFlag, fromTZ, toTZ)
-    if err != None:
+    if err is not None:
         return "", None
     return rfc3339(t, hasTZ), None
 
@@ -138,7 +130,7 @@ def DateTimeToEpoch(
     if datetime_in == "":
         return "", None
     t, _, err = parseDateTime(datetime_in, "", False, fromTZ, "")
-    if err != None:
+    if err is not None:
         return "", err
     if unit == epochUnitMilliseconds:
         return int(datetime(*t[:6], tzinfo=t.tm_zone).timestamp() * 1000), None
@@ -203,7 +195,7 @@ def Merge(*funcs) -> CustomFuncs:
     return merged
 
 
-def Coalesce(*strs, _: transformctx.Ctx = None) -> Tuple[string, Exception]:
+def Coalesce(*strs, _: transformctx.Ctx = None) -> Tuple[str, Exception]:
     for _, s in strs:
         if s != "":
             return s, None
@@ -215,7 +207,7 @@ def Concat(*strs, _: transformctx.Ctx = None) -> Tuple[str, Exception]:
     return result, None
 
 
-def Lower(s: str = "", _: transform.Ctx = None) -> Tuple[str, Exception]:
+def Lower(s: str = "", _: transformctx.Ctx = None) -> Tuple[str, Exception]:
     return s.lower(), None
 
 
