@@ -92,8 +92,8 @@ def _ParseBool(s: str) -> bool:
         return False
     else:
         raise Exception(
-            "Boolean value not parseable. " +
-            "See https://pkg.go.dev/strconv#ParseBool for acceptable values."
+            "Boolean value not parseable. "
+            + "See https://pkg.go.dev/strconv#ParseBool for acceptable values."
         )
 
 

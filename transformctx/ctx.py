@@ -8,7 +8,7 @@ class Ctx:
     InputName: str
     ExternalProperties: Dict[str, str]
     CtxAwareErr: errs.CtxAwareErr
-    CustomParam: Any  # TODO: Typehint interface closer to golang
+    CustomParam: Any
 
     def External(ctx: "Ctx", name: str) -> Tuple[str, bool]:
         v = ctx.ExternalProperties.get(name, default=None)
